@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WS Connection Tester</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
+        #status { font-weight: bold; }
+        .connected { color: green; }
+        .disconnected { color: red; }
+        .log { background: #f4f4f4; padding: 10px; border-radius: 5px; height: 200px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+
+    <h2>VirtualBox WebSocket Tester</h2>
+    <p>Status: <span id="status" class="disconnected">Disconnected</span></p>
+    
+    <div class="log" id="log">--- Event Log ---<br></div>
+
+    <script>
+        const statusEl = document.getElementById('status');
+        const logEl = document.getElementById('log');
+
+        function addLog(msg) {
+            logEl.innerHTML += `[${new Date().toLocaleTimeString()}] ${msg}<br>`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        // IMPORTANT: Use port 8080 because that is your VirtualBox Host Port
+        const socket = io("http://localhost", {
+            transports: ["websocket", "polling"] 
+        });
+
+        socket.on("connect", () => {
+            statusEl.innerText = "Connected to Server!";
+            statusEl.className = "connected";
+            addLog("Successfully connected via: " + socket.io.engine.transport.name);
+        });
+
+        socket.on("connect_error", (err) => {
+            statusEl.innerText = "Connection Failed";
+            statusEl.className = "disconnected";
+            addLog("Error: " + err.message);
+        });
+
+        socket.on("disconnect", () => {
+            statusEl.innerText = "Disconnected";
+            statusEl.className = "disconnected";
+            addLog("Server disconnected.");
+        });
+
+        // Listen for a custom message if your server emits one
+        socket.on("message", (data) => {
+            addLog("Received: " + data);
+        });
+    </script>
+</body>
+</html>

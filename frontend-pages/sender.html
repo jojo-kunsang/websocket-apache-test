@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sender - Node & Apache</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        input { padding: 10px; width: 250px; }
+        button { padding: 10px; cursor: pointer; background: #007bff; color: white; border: none; }
+    </style>
+</head>
+<body>
+    <h2>Sender Node</h2>
+    <input type="text" id="messageInput" placeholder="Type a message...">
+    <button onclick="sendMessage()">Send to VM</button>
+
+    <script>
+        const socket = io("http://localhost", { transports: ["websocket"] });
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            if (input.value) {
+                socket.emit("message", input.value);
+                input.value = '';
+            }
+        }
+
+        socket.on("connect", () => console.log("Sender connected!"));
+    </script>
+</body>
+</html>

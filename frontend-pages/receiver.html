@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Receiver - Node & Apache</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        #messages { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: auto; background: #fafafa; }
+        .msg { margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 4px; }
+    </style>
+</head>
+<body>
+    <h2>Receiver Node</h2>
+    <div id="messages">Waiting for messages...</div>
+
+    <script>
+        const socket = io("http://localhost", { transports: ["websocket"] });
+        const msgDiv = document.getElementById('messages');
+
+        socket.on("message", (data) => {
+            const newMsg = document.createElement('div');
+            newMsg.className = 'msg';
+            newMsg.innerText = `[${new Date().toLocaleTimeString()}] Sent: ${data}`;
+            msgDiv.appendChild(newMsg);
+            msgDiv.scrollTop = msgDiv.scrollHeight;
+        });
+
+        socket.on("connect", () => console.log("Receiver connected!"));
+    </script>
+</body>
+</html>
