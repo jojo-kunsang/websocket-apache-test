@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Socket.IO Page 1</title>
+    <style>
+        #status {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .connected {
+            color: green;
+        }
+
+        .connecting {
+            color: orange;
+        }
+
+        .disconnected {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Page 1</h2>
+    <div id="status" class="connecting">🟡 Connecting...</div>
+
+    <input id="msg" placeholder="Type message" />
+    <button onclick="send()">Send</button>
+
+    <ul id="messages"></ul>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const statusEl = document.getElementById("status");
+
+        const socket = io({
+            reconnection: true,
+            reconnectionAttempts: Infinity,
+            reconnectionDelay: 1000
+        });
+
+        function setStatus(state) {
+            statusEl.className = state;
+            if (state === "connected") statusEl.textContent = "🟢 Connected";
+            if (state === "connecting") statusEl.textContent = "🟡 Connecting...";
+            if (state === "disconnected") statusEl.textContent = "🔴 Disconnected";
+        }
+
+        socket.on("connect", () => {
+            setStatus("connected");
+            console.log("Connected:", socket.id);
+        });
+
+        socket.on("disconnect", () => {
+            setStatus("disconnected");
+        });
+
+        socket.io.on("reconnect_attempt", () => {
+            setStatus("connecting");
+        });
+
+        socket.io.on("connect_error", () => {
+            setStatus("connecting");
+        });
+
+        socket.on("message", (msg) => {
+            const li = document.createElement("li");
+            li.textContent = msg;
+            document.getElementById("messages").appendChild(li);
+        });
+
+        function send() {
+            const msg = document.getElementById("msg").value;
+            socket.emit("message", "Page 1: " + msg);
+            document.getElementById("msg").value = "";
+        }
+    </script>
+
+</body>
+
+</html>
